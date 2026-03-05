@@ -18,7 +18,34 @@ private:
 
     Node* first = nullptr;
     std::size_t sz = 0;
+    static Node* merge_sort(Node* head) {
+        if (!head || !head->next)
+            return head;
 
+        Node* second = split(head);
+
+        head = merge_sort(head);
+        second = merge_sort(second);
+
+        Node body(T{});
+        Node* tail = &body;
+
+        while (head && second) {
+            if (head->data < second->data) {
+                tail->next = head;
+                head = head->next;
+            }
+            else {
+                tail->next = second;
+                second = second->next;
+            }
+            tail = tail->next;
+        }
+
+        tail->next = head ? head : second;
+
+        return body.next;
+    }
 public:
     using iterator = ForwardListIterator<T, Node*>;
     using const_iterator = ForwardListIterator<const T, const Node*>;
@@ -52,6 +79,36 @@ public:
     {
         other.first = nullptr;
         other.sz = 0;
+    }
+    void merge(ForwardList& other) {
+        Node body(T{});
+        Node* tail = &body;
+
+        Node* a = first;
+        Node* b = other.first;
+
+        while (a && b) {
+            if (a->data < b->data) {
+                tail->next = a;
+                a = a->next;
+            }
+            else {
+                tail->next = b;
+                b = b->next;
+            }
+            tail = tail->next;
+        }
+
+        tail->next = a ? a : b;
+
+        first = body.next;
+        sz += other.sz;
+
+        other.first = nullptr;
+        other.sz = 0;
+    }
+    void sort() {
+        first = merge_sort(first);
     }
     ForwardList& operator=(const ForwardList& other) {
         if (this == &other) return *this;
